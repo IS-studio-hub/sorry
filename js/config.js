@@ -27,7 +27,8 @@ window.STORE_CONFIG = {
 
   // Optional: your Stripe publishable key (only needed if you later
   // add the advanced multi-item checkout — safe to leave blank).
-  stripePublishableKey: "",
+  stripePublishableKey:
+    "pk_live_51RWeVnELNCReRhXx2v8bdtVZe8rLJTRDX49ATtJxMhzzDqRDIbkcGLprWDf0RliHSvQNxprnzSAsY1xw0jHJm8bV00ivLibg6N",
 
   // Where the "leave your email" form sends notifications.
   // Uses FormSubmit.co (no signup / no backend needed). The FIRST time
@@ -46,7 +47,7 @@ window.STORE_CONFIG = {
       weight: 0.6,
       image: "assets/product-hoodie.jpg",
       // Paste your Stripe Payment Link here, e.g. "https://buy.stripe.com/xxxxxxxx"
-      paymentLink: "",
+      paymentLink: "https://buy.stripe.com/dRmeVd3wtfDE9D54Dr4Ja01",
     },
     {
       id: "tshirt",
@@ -56,7 +57,7 @@ window.STORE_CONFIG = {
       price: 39.0,
       weight: 0.2,
       image: "assets/product-tshirt.jpg",
-      paymentLink: "",
+      paymentLink: "https://buy.stripe.com/7sY5kDc2Zbnog1t3zn4Ja02",
     },
     {
       id: "cap",
@@ -66,7 +67,7 @@ window.STORE_CONFIG = {
       price: 34.0,
       weight: 0.15,
       image: "assets/product-cap.jpg",
-      paymentLink: "",
+      paymentLink: "https://buy.stripe.com/aFafZhffbfDEaH9fi54Ja03",
     },
     {
       id: "jacket",
@@ -76,7 +77,7 @@ window.STORE_CONFIG = {
       price: 179.0,
       weight: 1.2,
       image: "assets/product-jacket.jpg",
-      paymentLink: "",
+      paymentLink: "https://buy.stripe.com/dRmeVd1ol8bc6qTb1P4Ja04",
     },
   ],
 
