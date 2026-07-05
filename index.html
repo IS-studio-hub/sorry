@@ -35,9 +35,9 @@
     <img class="hero-bg" src="assets/hero.jpg" alt="Two people wearing SORRY. apparel in a warm-lit room" />
     <div class="hero-overlay"></div>
     <div class="container hero-content">
-      <p class="eyebrow eyebrow-tan">Est. Montréal — Fall / Winter 2026</p>
+      <p class="eyebrow eyebrow-tan">Est. Toronto — Summer / Winter 2026</p>
       <h1 class="hero-title"><span class="tan">Sorry.</span></h1>
-      <p class="hero-sub">Canadian-made. Unapologetically worn. Four pieces for people who stopped qualifying their opinions.</p>
+      <p class="hero-sub">Canadian-made. Unapologetically worn. Eight pieces for people who stopped qualifying their opinions.</p>
       <div class="hero-actions">
         <a href="#collection" class="btn btn-tan">Shop the collection <span aria-hidden="true">→</span></a>
       </div>
@@ -51,9 +51,9 @@
       <div class="collection-head">
         <div class="collection-head-left">
           <p class="eyebrow eyebrow-red">The Collection</p>
-          <h2 class="display">Four<br />Pieces<span class="dot">.</span></h2>
+          <h2 class="display">Eight<br />Pieces<span class="dot">.</span></h2>
         </div>
-        <p class="collection-statement">We didn't need twenty SKUs to say what we had to say. Four pieces, one statement, no apology.</p>
+        <p class="collection-statement">We didn't need twenty SKUs to say what we had to say. Eight pieces, one statement, no apology.</p>
       </div>
       <div class="product-grid" id="productGrid">
         <!-- Products injected by JS -->
@@ -143,6 +143,32 @@
   </aside>
 
   <div class="toast" id="toast"></div>
+
+  <!-- Product detail modal -->
+  <div class="product-modal-overlay" id="productModalOverlay" aria-hidden="true"></div>
+  <div class="product-modal" id="productModal" role="dialog" aria-modal="true" aria-labelledby="productModalTitle" aria-hidden="true">
+    <button class="product-modal-close" id="productModalClose" aria-label="Close product details">&times;</button>
+    <div class="product-modal-inner">
+      <div class="product-modal-media">
+        <img id="productModalImg" src="" alt="" />
+      </div>
+      <div class="product-modal-body">
+        <p class="product-modal-chapter" id="productModalChapter"></p>
+        <h2 class="product-modal-title display" id="productModalTitle"></h2>
+        <p class="product-modal-tagline" id="productModalTagline"></p>
+        <p class="product-modal-price" id="productModalPrice"></p>
+        <p class="product-modal-desc" id="productModalDesc"></p>
+        <div class="product-modal-details" id="productModalDetails" hidden></div>
+        <p class="product-modal-model" id="productModalModel" hidden></p>
+        <a class="product-modal-size-guide" id="productModalSizeGuide" href="#" target="_blank" rel="noopener noreferrer" hidden>Size guide</a>
+        <div class="product-modal-sizes">
+          <span class="product-modal-sizes-label">Size</span>
+          <div class="size-options" id="productModalSizes"></div>
+        </div>
+        <button class="btn btn-tan btn-full" id="productModalAdd" type="button">Add to cart</button>
+      </div>
+    </div>
+  </div>
 
   <script src="js/config.js"></script>
   <script src="js/shipping.js"></script>

@@ -36,15 +36,179 @@
       return p.paymentLink && p.paymentLink.trim() !== "";
     });
   }
+  function modalTitleFromName(name) {
+    var word = (name || "").trim().split(/\s+/).pop().replace(/\./g, "");
+    return word ? word.toUpperCase() + '<span class="dot">.</span>' : "";
+  }
+  function renderProductDetails(p) {
+    var wrap = document.getElementById("productModalDetails");
+    var model = document.getElementById("productModalModel");
+    var sizeGuide = document.getElementById("productModalSizeGuide");
+    if (!wrap) return;
+
+    var html = "";
+
+    if (p.details && p.details.length) {
+      html +=
+        '<dl class="product-modal-details-list">' +
+        p.details
+          .map(function (row) {
+            return (
+              '<div class="product-detail-row"><dt>' +
+              row.title +
+              "</dt><dd>" +
+              row.body +
+              "</dd></div>"
+            );
+          })
+          .join("") +
+        "</dl>";
+    }
+
+    if (p.care && p.care.length) {
+      html +=
+        '<div class="product-detail-care"><h4>Care instructions</h4><ul>' +
+        p.care
+          .map(function (item) {
+            return "<li>" + item + "</li>";
+          })
+          .join("") +
+        "</ul></div>";
+    }
+
+    if (html) {
+      wrap.innerHTML = html;
+      wrap.hidden = false;
+    } else {
+      wrap.innerHTML = "";
+      wrap.hidden = true;
+    }
+
+    if (model) {
+      if (p.modelNote) {
+        model.textContent = p.modelNote;
+        model.hidden = false;
+      } else {
+        model.textContent = "";
+        model.hidden = true;
+      }
+    }
+
+    if (sizeGuide) {
+      if (p.sizeGuide) {
+        sizeGuide.href = p.sizeGuide;
+        sizeGuide.hidden = false;
+      } else {
+        sizeGuide.href = "#";
+        sizeGuide.hidden = true;
+      }
+    }
+  }
+
+  function visibleProducts() {
+    return cfg.products.filter(function (p) {
+      return !p.hidden;
+    });
+  }
+
+  /* ---------- Product modal ---------- */
+  var activeProductId = null;
+  var selectedSize = null;
+
+  function openProductModal(id) {
+    var p = getProduct(id);
+    if (!p || p.hidden) return;
+
+    activeProductId = id;
+    selectedSize = (p.sizes && p.sizes[0]) || "M";
+
+    var overlay = document.getElementById("productModalOverlay");
+    var modal = document.getElementById("productModal");
+    var img = document.getElementById("productModalImg");
+    var chapter = document.getElementById("productModalChapter");
+    var title = document.getElementById("productModalTitle");
+    var tagline = document.getElementById("productModalTagline");
+    var price = document.getElementById("productModalPrice");
+    var desc = document.getElementById("productModalDesc");
+    var sizes = document.getElementById("productModalSizes");
+
+    if (img) {
+      img.src = p.image;
+      img.alt = p.name;
+    }
+    if (chapter) {
+      var label = (p.chapter || "").toUpperCase();
+      var meta = p.colorway ? p.colorway.toUpperCase() : "";
+      if (p.blankStyle) meta = meta ? meta + " · " + p.blankStyle.toUpperCase() : p.blankStyle.toUpperCase();
+      chapter.textContent = meta ? label + " — " + meta : label;
+    }
+    if (title) title.innerHTML = modalTitleFromName(p.name);
+    if (tagline) tagline.textContent = p.modalTagline || p.tagline || "";
+    if (price) price.textContent = money(p.price) + " " + (cfg.currency || "CAD");
+    if (desc) desc.textContent = p.description || p.tagline || "";
+    renderProductDetails(p);
+
+    if (sizes) {
+      var sizeList = p.sizes && p.sizes.length ? p.sizes : ["S", "M", "L", "XL"];
+      sizes.innerHTML = sizeList
+        .map(function (size) {
+          var active = size === selectedSize ? " is-active" : "";
+          return (
+            '<button type="button" class="size-btn' +
+            active +
+            '" data-size="' +
+            size +
+            '">' +
+            size +
+            "</button>"
+          );
+        })
+        .join("");
+
+      sizes.querySelectorAll(".size-btn").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          selectedSize = btn.getAttribute("data-size");
+          sizes.querySelectorAll(".size-btn").forEach(function (b) {
+            b.classList.toggle("is-active", b === btn);
+          });
+        });
+      });
+    }
+
+    overlay.classList.add("show");
+    modal.classList.add("open");
+    overlay.setAttribute("aria-hidden", "false");
+    modal.setAttribute("aria-hidden", "false");
+    document.body.style.overflow = "hidden";
+  }
+
+  function closeProductModal() {
+    var overlay = document.getElementById("productModalOverlay");
+    var modal = document.getElementById("productModal");
+    if (!modal || !modal.classList.contains("open")) return;
+
+    overlay.classList.remove("show");
+    modal.classList.remove("open");
+    overlay.setAttribute("aria-hidden", "true");
+    modal.setAttribute("aria-hidden", "true");
+    document.body.style.overflow = "";
+    activeProductId = null;
+  }
+
+  function addFromModal() {
+    if (!activeProductId) return;
+    addToCart(activeProductId, { fromModal: true });
+    closeProductModal();
+  }
 
   /* ---------- Render products ---------- */
   function renderProducts() {
     var grid = document.getElementById("productGrid");
     if (!grid) return;
-    grid.innerHTML = cfg.products
+    grid.innerHTML = visibleProducts()
       .map(function (p) {
         return (
-          '<article class="product-card">' +
+          '<article class="product-card" data-id="' + p.id + '" tabindex="0" role="button" aria-label="View ' + p.name + '">' +
           '<div class="product-media">' +
           (p.chapter ? '<span class="product-chapter">' + p.chapter + "</span>" : "") +
           '<img src="' + p.image + '" alt="' + p.name + '" loading="lazy" />' +
@@ -62,22 +226,39 @@
       })
       .join("");
 
+    grid.querySelectorAll(".product-card").forEach(function (card) {
+      card.addEventListener("click", function (e) {
+        if (e.target.closest(".btn-add")) return;
+        openProductModal(card.getAttribute("data-id"));
+      });
+      card.addEventListener("keydown", function (e) {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          openProductModal(card.getAttribute("data-id"));
+        }
+      });
+    });
+
     grid.querySelectorAll(".btn-add").forEach(function (btn) {
-      btn.addEventListener("click", function () {
+      btn.addEventListener("click", function (e) {
+        e.stopPropagation();
         addToCart(btn.getAttribute("data-id"));
       });
     });
   }
 
   /* ---------- Cart actions ---------- */
-  function addToCart(id) {
+  function addToCart(id, opts) {
+    opts = opts || {};
     cart[id] = (cart[id] || 0) + 1;
     saveCart();
     renderCart();
     updateCount();
     var p = getProduct(id);
-    showToast((p ? p.name : "Item") + " added to cart");
-    openCart();
+    var label = p ? p.name : "Item";
+    if (opts.fromModal && selectedSize) label += " (" + selectedSize + ")";
+    showToast(label + " added to cart");
+    if (!opts.fromModal) openCart();
   }
   function setQty(id, qty) {
     if (qty <= 0) {
@@ -385,8 +566,17 @@
     document.getElementById("cartClose").addEventListener("click", closeCart);
     document.getElementById("cartOverlay").addEventListener("click", closeCart);
     document.getElementById("checkoutBtn").addEventListener("click", checkout);
+    document.getElementById("productModalClose").addEventListener("click", closeProductModal);
+    document.getElementById("productModalOverlay").addEventListener("click", closeProductModal);
+    document.getElementById("productModalAdd").addEventListener("click", addFromModal);
     document.addEventListener("keydown", function (e) {
-      if (e.key === "Escape") closeCart();
+      if (e.key === "Escape") {
+        if (document.getElementById("productModal").classList.contains("open")) {
+          closeProductModal();
+        } else {
+          closeCart();
+        }
+      }
     });
 
     var yr = document.getElementById("year");
